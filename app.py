@@ -14,7 +14,6 @@ st.title("🧬 Ultra Pro Dip DNA Analiz Sistemi")
 st.markdown("80-80 Pivot + 40+ MA + 100 Bar Öncesi Yol Analizi + İstatistiksel Sentez")
 
 def get_bist_tickers():
-    """Hisseleri Borsapy olmadan manuel olarak yazdık"""
     return [
         "THYAO.IS", "ASELS.IS", "GARAN.IS", "EREGL.IS", "SISE.IS", "AKBNK.IS", "HALKB.IS", 
         "ISCTR.IS", "YKBNK.IS", "SAHOL.IS", "TUPRS.IS", "KCHOL.IS", "SOKM.IS", "BIMAS.IS", 
@@ -251,6 +250,7 @@ def synthesize_dip_dna(dips_df):
         'path_rsi_mean': float(dips_df['path_rsi_mean'].median()),
         'path_rsi_min': float(dips_df['path_rsi_min'].median()),
         'path_rsi_below_30_avg': float(dips_df['path_rsi_below_30_days'].mean()),
+        'path_vol_ratio_med': float(dips_df['vol_ratio'].median()), # EKLENDİ
         'path_vol_spike_avg': float(dips_df['path_vol_spike_days'].mean()),
         'path_bearish_days_avg': float(dips_df['path_bearish_align_days'].mean())
     }
@@ -263,7 +263,7 @@ def generate_dna_insights(dna):
     insights.append(f"📊 **Toplam Analiz Edilen Dip:** {dna['total_dips']}")
     insights.append(f"📉 **Tipik Dip RSI:** {dna['dip_rsi_med']:.1f} (Çoğunlukla {dna['dip_rsi_25']:.1f} - {dna['dip_rsi_75']:.1f} aralığında)")
     insights.append(f"🌀 **MA Sıkışması:** Dip anında ortalama EMA tangle %{dna['dip_ema_tangle_med']:.2f}")
-    insights.append(f"🚦 **Trend Durumu:** Diplerin %{dna['dip_bearish_align_pct']:.1f}'inde EMA'lar tam bearish hizalıydı (8<13<21<50<200<600)")
+    insights.append(f" **Trend Durumu:** Diplerin %{dna['dip_bearish_align_pct']:.1f}'inde EMA'lar tam bearish hizalıydı (8<13<21<50<200<600)")
     insights.append(f"🛣️ **Dibe Giden Yol:** Son 100 barda ortalama {dna['path_rsi_below_30_avg']:.1f} gün RSI < 30 bölgesinde kaldı.")
     insights.append(f"💥 **Kapitülasyon:** Dibe inerken ortalama {dna['path_vol_spike_avg']:.1f} gün hacim 2 katından fazla patladı.")
     return insights
@@ -352,7 +352,7 @@ with st.sidebar:
         tickers_text = st.text_area("Hisseler (her satıra bir tane)", "THYAO.IS\nASELS.IS\nGARAN.IS\nEREGL.IS\nSISE.IS", height=150)
     
     st.markdown("---")
-    st.info("🧬 **Sistem Özellikleri:**\n- 20 SMA + 20 EMA (SMA 800, EMA 600 dahil)\n- 80-80 Pivot Tespiti\n- 100 Bar Öncesi Yol Analizi\n- Python 3.14 Uyumlu")
+    st.info(" **Sistem Özellikleri:**\n- 20 SMA + 20 EMA (SMA 800, EMA 600 dahil)\n- 80-80 Pivot Tespiti\n- 100 Bar Öncesi Yol Analizi\n- Python 3.14 Uyumlu")
 
 if mode == "Tek Hisse Derin Analiz":
     st.header(f"🔬 {ticker_input} Derin Dip Analizi")
@@ -450,7 +450,7 @@ if mode == "Tek Hisse Derin Analiz":
                 ham_cols = ['date', 'price', 'rsi', 'mfi', 'ema_tangle', 'vol_ratio', 'is_bearish_align', 'path_rsi_min', 'path_vol_spike_days']
                 st.dataframe(dips_df[ham_cols].sort_values('date', ascending=False), use_container_width=True)
         else:
-            st.warning(f"⚠️ {ticker_input} için yeterli veri (en az 800 bar) veya 80-80 pivot dibi bulunamadı.")
+            st.warning(f"️ {ticker_input} için yeterli veri (en az 800 bar) veya 80-80 pivot dibi bulunamadı.")
 
 elif mode in ["Çoklu Hisse Tarama", "Tüm BIST DNA Sentezi"]:
     st.header("🌐 Geniş Kapsamlı Tarama")
@@ -488,20 +488,20 @@ elif mode in ["Çoklu Hisse Tarama", "Tüm BIST DNA Sentezi"]:
             for insight in insights:
                 st.markdown(f"- {insight}")
             
-            st.subheader("🏆 En Çok Dip Oluşturan Hisseler")
+            st.subheader(" En Çok Dip Oluşturan Hisseler")
             summary = master_df.groupby('ticker').agg(
-                Dip_Sayısı=('ticker', 'count'),
+                Dip_Sayisi=('ticker', 'count'),
                 Ort_Dip_RSI=('rsi', 'mean'),
                 Ort_EMA_Tangle=('ema_tangle', 'mean'),
-                Ort_Yol_Hacim_Patlaması=('path_vol_spike_days', 'mean')
-            ).sort_values('Dip_Sayısı', ascending=False).reset_index()
+                Ort_Yol_Hacim_Patlamasi=('path_vol_spike_days', 'mean')
+            ).sort_values('Dip_Sayisi', ascending=False).reset_index()
             
             st.dataframe(summary.head(50), use_container_width=True)
             
             csv = master_df.to_csv(index=False, encoding='utf-8-sig').encode('utf-8')
-            st.download_button("📥 Tüm Analiz Verisini İndir (CSV)", data=csv, file_name=f"bist_dip_dna_analiz_{datetime.now().strftime('%Y%m%d')}.csv", mime="text/csv")
+            st.download_button(" Tüm Analiz Verisini İndir (CSV)", data=csv, file_name=f"bist_dip_dna_analiz_{datetime.now().strftime('%Y%m%d')}.csv", mime="text/csv")
         else:
             st.warning("⚠️ Hiçbir hisse için dip bulunamadı.")
 
 st.markdown("---")
-st.markdown("<div style='text-align: center; color: gray;'><p>Ultra Pro Dip DNA Analiz Sistemi v4.0 | 40+ MA, 100-Bar Yol Analizi, Borsapy Entegrasyonu</p></div>", unsafe_allow_html=True)
+st.markdown("<div style='text-align: center; color: gray;'><p>Ultra Pro Dip DNA Analiz Sistemi v4.1 | 40+ MA, 100-Bar Yol Analizi, KeyError Düzeltildi</p></div>", unsafe_allow_html=True)
