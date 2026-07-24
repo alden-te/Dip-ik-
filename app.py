@@ -13,15 +13,11 @@ st.set_page_config(page_title="Ultra Pro Dip DNA Analiz", page_icon="🧬", layo
 st.title("🧬 Ultra Pro Dip DNA Analiz Sistemi")
 st.markdown("80-80 Pivot + 40+ MA + 100 Bar Öncesi Yol Analizi + İstatistiksel Sentez")
 
-# ============================================================================
-# BÖLÜM 1: HİSSE LİSTESİ (Borsapy + Sağlam Fallback)
-# ============================================================================
 @st.cache_data(ttl=86400)
 def get_bist_tickers():
     try:
         from borsapy import Borsapy
         bp = Borsapy()
-        # Borsapy ile tüm hisseleri çekmeyi dene
         stocks = bp.get_all_stocks()
         if stocks and len(stocks) > 50:
             tickers = [s['kod'] + '.IS' for s in stocks if 'kod' in s]
@@ -30,99 +26,123 @@ def get_bist_tickers():
     except Exception as e:
         st.sidebar.warning(f"⚠️ Borsapy bağlantı hatası, yedek liste kullanılıyor. ({e})")
     
-    # Fallback: Kapsamlı BIST hisse listesi
     return [
-        "THYAO.IS", "ASELS.IS", "GARAN.IS", "EREGL.IS", "SISE.IS", "AKBNK.IS", "HALKB.IS", "ISCTR.IS", "YKBNK.IS", "SAHOL.IS",
-        "TUPRS.IS", "KCHOL.IS", "SOKM.IS", "BIMAS.IS", "MGROS.IS", "FROTO.IS", "TOASO.IS", "TTRAK.IS", "ALARK.IS", "ENJSA.IS",
-        "PETKM.IS", "TCELL.IS", "TTKOM.IS", "VESBE.IS", "ARCLK.IS", "HEKTS.IS", "MAALT.IS", "OSTIM.IS", "PKENT.IS", "ISGYO.IS",
-        "AKSEN.IS", "AKGRT.IS", "ALBRK.IS", "ALGYO.IS", "ANSGR.IS", "BANVT.IS", "BIZIM.IS", "BOLUC.IS", "BRKSN.IS", "BRYAT.IS",
-        "BSOKE.IS", "CELHA.IS", "CIMSA.IS", "DENGE.IS", "DERIM.IS", "DEVA.IS", "DITAS.IS", "DOHOL.IS", "ECILC.IS", "ECZYT.IS",
-        "EGEEN.IS", "EGEGR.IS", "EMKEL.IS", "ENKAI.IS", "ERBOS.IS", "ERSU.IS", "ESCOM.IS", "FENER.IS", "FLAP.IS", "FORMT.IS",
-        "GEDIK.IS", "GLYHO.IS", "GOODY.IS", "GOLTS.IS", "GRNSY.IS", "GUBRF.IS", "HATEK.IS", "HUBVC.IS", "IHLAS.IS", "IHLGM.IS",
-        "ISDMR.IS", "ISFIN.IS", "ISGSY.IS", "ISYAT.IS", "IZMDC.IS", "JANTS.IS", "KAREL.IS", "KARSN.IS", "KENT.IS", "KLMSN.IS",
-        "KORDS.IS", "KUTPO.IS", "KZBGY.IS", "LOGO.IS", "LUXKM.IS", "MAVI.IS", "MESYO.IS", "MIATK.IS", "MPARK.IS", "MRDIN.IS",
-        "NETAS.IS", "NIBAS.IS", "OBASE.IS", "OHHUD.IS", "ONCSM.IS", "ORGE.IS", "OTKAR.IS", "OYAKC.IS", "OYLUM.IS", "OYYAT.IS",
-        "PAGYO.IS", "PAPIL.IS", "PAREL.IS", "PASEU.IS", "PENTA.IS", "PETUN.IS", "PINSU.IS", "PKART.IS", "PLTUR.IS", "PNSUT.IS",
-        "PRDGS.IS", "PRKAB.IS", "PRKME.IS", "PSDTC.IS", "PSGYO.IS", "RAYSG.IS", "RCYAS.IS", "RYSAS.IS", "SARKY.IS", "SASA.IS",
-        "SAYAS.IS", "SDTTR.IS", "SELEC.IS", "SELGD.IS", "SERNT.IS", "SEYKM.IS", "SKBNK.IS", "SKTAS.IS", "SKYLP.IS", "SMART.IS",
-        "SNGYO.IS", "SONME.IS", "SRVGY.IS", "SUGRT.IS", "SUMAS.IS", "SUNTK.IS", "TATGD.IS", "TATKS.IS", "TAVHA.IS", "TEKTU.IS",
-        "TEKNO.IS", "TLMAN.IS", "TMPOL.IS", "TRGYO.IS", "TRKCM.IS", "TRNCA.IS", "TSGYO.IS", "TSKB.IS", "TUCLK.IS", "TUKAS.IS",
-        "ULUUN.IS", "UNLU.IS", "UTASY.IS", "UZRGM.IS", "VAKBN.IS", "VAKKO.IS", "VANET.IS", "VERUS.IS", "VKING.IS", "VKGYO.IS",
-        "YATAS.IS", "YBOYA.IS", "YESIL.IS", "YGYO.IS", "YKSLN.IS", "YONGA.IS", "YUNSA.IS", "AVOD.IS", "AYCES.IS", "AYDEM.IS"
+        "THYAO.IS", "ASELS.IS", "GARAN.IS", "EREGL.IS", "SISE.IS", "AKBNK.IS", "HALKB.IS", 
+        "ISCTR.IS", "YKBNK.IS", "SAHOL.IS", "TUPRS.IS", "KCHOL.IS", "SOKM.IS", "BIMAS.IS", 
+        "MGROS.IS", "FROTO.IS", "TOASO.IS", "TTRAK.IS", "ALARK.IS", "ENJSA.IS", "PETKM.IS", 
+        "TCELL.IS", "TTKOM.IS", "VESBE.IS", "ARCLK.IS", "HEKTS.IS", "MAALT.IS", "OSTIM.IS", 
+        "PKENT.IS", "ISGYO.IS", "AKSEN.IS", "AKGRT.IS", "ALBRK.IS", "ALGYO.IS", "ANSGR.IS", 
+        "BANVT.IS", "BIZIM.IS", "BOLUC.IS", "BRKSN.IS", "BRYAT.IS", "BSOKE.IS", "CELHA.IS", 
+        "CIMSA.IS", "DENGE.IS", "DERIM.IS", "DEVA.IS", "DITAS.IS", "DOHOL.IS", "ECILC.IS", 
+        "ECZYT.IS", "EGEEN.IS", "EGEGR.IS", "EMKEL.IS", "ENKAI.IS", "ERBOS.IS", "ERSU.IS", 
+        "ESCOM.IS", "FENER.IS", "FLAP.IS", "FORMT.IS", "GEDIK.IS", "GLYHO.IS", "GOODY.IS", 
+        "GOLTS.IS", "GRNSY.IS", "GUBRF.IS", "HATEK.IS", "HUBVC.IS", "IHLAS.IS", "IHLGM.IS", 
+        "ISDMR.IS", "ISFIN.IS", "ISGSY.IS", "ISYAT.IS", "IZMDC.IS", "JANTS.IS", "KAREL.IS", 
+        "KARSN.IS", "KENT.IS", "KLMSN.IS", "KORDS.IS", "KUTPO.IS", "KZBGY.IS", "LOGO.IS", 
+        "LUXKM.IS", "MAVI.IS", "MESYO.IS", "MIATK.IS", "MPARK.IS", "MRDIN.IS", "NETAS.IS", 
+        "NIBAS.IS", "OBASE.IS", "OHHUD.IS", "ONCSM.IS", "ORGE.IS", "OTKAR.IS", "OYAKC.IS", 
+        "OYLUM.IS", "OYYAT.IS", "PAGYO.IS", "PAPIL.IS", "PAREL.IS", "PASEU.IS", "PENTA.IS", 
+        "PETUN.IS", "PINSU.IS", "PKART.IS", "PLTUR.IS", "PNSUT.IS", "PRDGS.IS", "PRKAB.IS", 
+        "PRKME.IS", "PSDTC.IS", "PSGYO.IS", "RAYSG.IS", "RCYAS.IS", "RYSAS.IS", "SARKY.IS", 
+        "SASA.IS", "SAYAS.IS", "SDTTR.IS", "SELEC.IS", "SELGD.IS", "SERNT.IS", "SEYKM.IS", 
+        "SKBNK.IS", "SKTAS.IS", "SKYLP.IS", "SMART.IS", "SNGYO.IS", "SONME.IS", "SRVGY.IS", 
+        "SUGRT.IS", "SUMAS.IS", "SUNTK.IS", "TATGD.IS", "TATKS.IS", "TAVHA.IS", "TEKTU.IS", 
+        "TEKNO.IS", "TLMAN.IS", "TMPOL.IS", "TRGYO.IS", "TRKCM.IS", "TRNCA.IS", "TSGYO.IS", 
+        "TSKB.IS", "TUCLK.IS", "TUKAS.IS", "ULUUN.IS", "UNLU.IS", "UTASY.IS", "UZRGM.IS", 
+        "VAKBN.IS", "VAKKO.IS", "VANET.IS", "VERUS.IS", "VKING.IS", "VKGYO.IS", "YATAS.IS", 
+        "YBOYA.IS", "YESIL.IS", "YGYO.IS", "YKSLN.IS", "YONGA.IS", "YUNSA.IS", "AVOD.IS", 
+        "AYCES.IS", "AYDEM.IS"
     ]
 
-# ============================================================================
-# BÖLÜM 2: DEV İNDİKATÖR MOTORU (20 SMA + 20 EMA + Osilatörler)
-# ============================================================================
+def calc_rsi(series, period=14):
+    delta = series.diff()
+    gain = delta.where(delta > 0, 0).rolling(window=period).mean()
+    loss = (-delta.where(delta < 0, 0)).rolling(window=period).mean()
+    rs = gain / loss
+    return 100 - (100 / (1 + rs))
+
+def calc_mfi(high, low, close, volume, period=14):
+    tp = (high + low + close) / 3
+    mf = tp * volume
+    delta_mfi = tp.diff()
+    pos_mf = mf.where(delta_mfi > 0, 0).rolling(window=period).sum()
+    neg_mf = mf.where(delta_mfi < 0, 0).rolling(window=period).sum()
+    return 100 - (100 / (1 + pos_mf / neg_mf))
+
+def calc_stoch_rsi(rsi, period=14, k=3, d=3):
+    low_rsi = rsi.rolling(window=period).min()
+    high_rsi = rsi.rolling(window=period).max()
+    stoch = 100 * ((rsi - low_rsi) / (high_rsi - low_rsi))
+    k_line = stoch.rolling(window=k).mean()
+    d_line = k_line.rolling(window=d).mean()
+    return k_line, d_line
+
+def calc_williams_r(high, low, close, period=14):
+    hh = high.rolling(window=period).max()
+    ll = low.rolling(window=period).min()
+    return -100 * ((hh - close) / (hh - ll))
+
+def calc_macd(close, fast=12, slow=26, signal=9):
+    ema_fast = close.ewm(span=fast, adjust=False).mean()
+    ema_slow = close.ewm(span=slow, adjust=False).mean()
+    macd_line = ema_fast - ema_slow
+    signal_line = macd_line.ewm(span=signal, adjust=False).mean()
+    hist = macd_line - signal_line
+    return macd_line, signal_line, hist
+
+def calc_bbands(close, period=20, std_dev=2):
+    mid = close.rolling(window=period).mean()
+    std = close.rolling(window=period).std()
+    upper = mid + (std_dev * std)
+    lower = mid - (std_dev * std)
+    pct = (close - lower) / (upper - lower)
+    width = ((upper - lower) / mid) * 100
+    return upper, mid, lower, pct, width
+
+def calc_atr(high, low, close, period=14):
+    tr1 = high - low
+    tr2 = abs(high - close.shift(1))
+    tr3 = abs(low - close.shift(1))
+    tr = pd.concat([tr1, tr2, tr3], axis=1).max(axis=1)
+    return tr.rolling(window=period).mean()
+
 def calculate_massive_indicators(df):
-    if df is None or len(df) < 800: # SMA 800 için en az 800 bar gerekli
+    if df is None or len(df) < 800:
         return None
-    
     df = df.copy()
     
-    # 20 SMA (SMA 800 dahil)
     sma_periods = [5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 120, 140, 160, 180, 200, 250, 300, 400, 800]
     for p in sma_periods:
         df[f'SMA_{p}'] = df['Close'].rolling(window=p).mean()
         df[f'Dist_SMA_{p}'] = ((df['Close'] - df[f'SMA_{p}']) / df[f'SMA_{p}']) * 100
         
-    # 20 EMA (EMA 600 dahil)
     ema_periods = [5, 8, 10, 13, 20, 21, 30, 34, 40, 50, 60, 70, 80, 90, 100, 120, 150, 200, 300, 600]
     for p in ema_periods:
         df[f'EMA_{p}'] = df['Close'].ewm(span=p, adjust=False).mean()
         df[f'Dist_EMA_{p}'] = ((df['Close'] - df[f'EMA_{p}']) / df[f'EMA_{p}']) * 100
         
-    # Manuel Osilatörler (Python 3.14 uyumlu, pandas-ta yok)
-    # RSI
-    delta = df['Close'].diff()
-    gain = delta.where(delta > 0, 0).rolling(window=14).mean()
-    loss = (-delta.where(delta < 0, 0)).rolling(window=14).mean()
-    rs = gain / loss
-    df['RSI_14'] = 100 - (100 / (1 + rs))
-    
-    # MFI
-    tp = (df['High'] + df['Low'] + df['Close']) / 3
-    mf = tp * df['Volume']
-    delta_mfi = tp.diff()
-    pos_mf = mf.where(delta_mfi > 0, 0).rolling(window=14).sum()
-    neg_mf = mf.where(delta_mfi < 0, 0).rolling(window=14).sum()
-    df['MFI_14'] = 100 - (100 / (1 + pos_mf / neg_mf))
-    
-    # StochRSI
-    low_rsi = df['RSI_14'].rolling(window=14).min()
-    high_rsi = df['RSI_14'].rolling(window=14).max()
-    stoch = 100 * ((df['RSI_14'] - low_rsi) / (high_rsi - low_rsi))
-    df['STOCHRSIk_14'] = stoch.rolling(window=3).mean0
-    df['STOCHRSId_14'] = df['STOCHRSIk_14'].rolling(window=3).mean()
-    
-    # Williams %R
-    hh = df['High'].rolling(window=14).max()
-    ll = df['Low'].rolling(window=14).min()
-    df['WILLR_14'] = -100 * ((hh - df['Close']) / (hh - ll))
-    
-    # Bollinger Bands
-    mid = df['Close'].rolling(window=20).mean()
-    std = df['Close'].rolling(window=20).std()
-    df['BBU_20'] = mid + (2 * std)
-    df['BBL_20'] = mid - (2 * std)
-    df['BBP_20'] = (df['Close'] - df['BBL_20']) / (df['BBU_20'] - df['BBL_20'])
-    
-    # ATR
-    tr1 = df['High'] - df['Low']
-    tr2 = abs(df['High'] - df['Close'].shift(1))
-    tr3 = abs(df['Low'] - df['Close'].shift(1))
-    tr = pd.concat([tr1, tr2, tr3], axis=1).max(axis=1)
-    df['ATR_14'] = tr.rolling(window=14).mean()
-    
-    # Volume
+    df['RSI_14'] = calc_rsi(df['Close'], 14)
+    df['MFI_14'] = calc_mfi(df['High'], df['Low'], df['Close'], df['Volume'], 14)
+    k, d = calc_stoch_rsi(df['RSI_14'], 14, 3, 3)
+    df['STOCHRSIk_14'] = k
+    df['STOCHRSId_14'] = d
+    df['WILLR_14'] = calc_williams_r(df['High'], df['Low'], df['Close'], 14)
+    m, s, h = calc_macd(df['Close'], 12, 26, 9)
+    df['MACD_12_26_9'] = m
+    df['MACDs_12_26_9'] = s
+    df['MACDh_12_26_9'] = h
+    u, mid, l, p, w = calc_bbands(df['Close'], 20, 2)
+    df['BBU_20'] = u
+    df['BBM_20'] = mid
+    df['BBL_20'] = l
+    df['BBP_20'] = p
+    df['BBB_20'] = w
+    df['ATR_14'] = calc_atr(df['High'], df['Low'], df['Close'], 14)
     df['Vol_SMA_20'] = df['Volume'].rolling(window=20).mean()
     df['Vol_Ratio'] = df['Volume'] / df['Vol_SMA_20']
     
     return df
 
-# ============================================================================
-# BÖLÜM 3: 80-80 PIVOT VE 100 BAR ÖNCESİ YOL ANALİZİ (FORENSIC)
-# ============================================================================
 def find_80_80_pivots(df):
     lows = df['Low'].values
     n = len(lows)
@@ -133,42 +153,35 @@ def find_80_80_pivots(df):
     return pivots
 
 def analyze_100bar_path(df, dip_idx):
-    """Dip anından önceki 100 barın detaylı röntgenini çeker"""
     start_idx = max(0, dip_idx - 100)
     path_window = df.iloc[start_idx : dip_idx]
     dip_bar = df.iloc[dip_idx]
     
-    # 1. DİP ANI VERİLERİ
     dip_price = float(dip_bar['Close'])
     
-    # MA Tangle (Sıkışma) Hesabı
     ema_vals = [float(dip_bar.get(f'EMA_{p}', np.nan)) for p in [8, 13, 21, 50, 200, 600] if pd.notna(dip_bar.get(f'EMA_{p}', np.nan))]
     sma_vals = [float(dip_bar.get(f'SMA_{p}', np.nan)) for p in [20, 50, 100, 200, 800] if pd.notna(dip_bar.get(f'SMA_{p}', np.nan))]
     
     ema_tangle = (np.std(ema_vals) / np.mean(ema_vals)) * 100 if len(ema_vals) > 1 and np.mean(ema_vals) > 0 else 50
     sma_tangle = (np.std(sma_vals) / np.mean(sma_vals)) * 100 if len(sma_vals) > 1 and np.mean(sma_vals) > 0 else 50
     
-    # Bearish Alignment Kontrolü (8 < 13 < 21 < 50 < 200 < 600)
     is_bearish_align = 1 if (len(ema_vals) >= 6 and all(ema_vals[i] < ema_vals[i+1] for i in range(len(ema_vals)-1))) else 0
     
-    # Fiyat Pozisyonu (Son 20 bar içinde)
     low_20 = df['Low'].iloc[max(0, dip_idx-19):dip_idx+1].min()
     high_20 = df['High'].iloc[max(0, dip_idx-19):dip_idx+1].max()
     range_20 = high_20 - low_20
     price_pos = ((dip_price - low_20) / range_20) * 100 if range_20 > 0 else 50
     
-    # 2. 100 BARLIK YOL ANALİZİ (Nasıl geldik?)
     path_stats = {
         'path_rsi_mean': float(path_window['RSI_14'].mean()),
         'path_rsi_min': float(path_window['RSI_14'].min()),
         'path_rsi_below_30_days': int((path_window['RSI_14'] < 30).sum()),
         'path_mfi_mean': float(path_window['MFI_14'].mean()),
         'path_vol_ratio_mean': float(path_window['Vol_Ratio'].mean()),
-        'path_vol_spike_days': int((path_window['Vol_Ratio'] > 2.0).sum()), # Kapitülasyon hacmi
-        'path_bearish_align_days': 0 # Bunu aşağıda hesaplayacağız
+        'path_vol_spike_days': int((path_window['Vol_Ratio'] > 2.0).sum()),
+        'path_bearish_align_days': 0
     }
     
-    # 100 bar içinde kaç gün bearish alignment vardı?
     bearish_days = 0
     for i in range(len(path_window)):
         row = path_window.iloc[i]
@@ -220,7 +233,6 @@ def process_stock(ticker, period="5y"):
             
         dips = []
         for p_idx in pivots:
-            # İş günü kontrolü
             if pd.to_datetime(df.index[p_idx]).weekday() >= 5:
                 continue
             analysis = analyze_100bar_path(df, p_idx)
@@ -232,17 +244,12 @@ def process_stock(ticker, period="5y"):
     except Exception:
         return None, None
 
-# ============================================================================
-# BÖLÜM 4: DİP DNA SENTEZİ (İstatistiksel Ortak Akıl)
-# ============================================================================
 def synthesize_dip_dna(dips_df):
     if dips_df is None or dips_df.empty:
         return None
     
-    # Sentez: Medyan ve Çeyreklikler (Outlier'lardan etkilenmez, gerçek profili verir)
     dna = {
         'total_dips': len(dips_df),
-        # Dip Anı Profili
         'dip_rsi_med': float(dips_df['rsi'].median()),
         'dip_rsi_25': float(dips_df['rsi'].quantile(0.25)),
         'dip_rsi_75': float(dips_df['rsi'].quantile(0.75)),
@@ -252,8 +259,6 @@ def synthesize_dip_dna(dips_df):
         'dip_vol_ratio_med': float(dips_df['vol_ratio'].median()),
         'dip_price_pos_med': float(dips_df['price_pos'].median()),
         'dip_bearish_align_pct': float(dips_df['is_bearish_align'].mean()) * 100,
-        
-        # 100 Barlık Yol Profili (Nasıl geldik?)
         'path_rsi_mean': float(dips_df['path_rsi_mean'].median()),
         'path_rsi_min': float(dips_df['path_rsi_min'].median()),
         'path_rsi_below_30_avg': float(dips_df['path_rsi_below_30_days'].mean()),
@@ -274,9 +279,6 @@ def generate_dna_insights(dna):
     insights.append(f"💥 **Kapitülasyon:** Dibe inerken ortalama {dna['path_vol_spike_avg']:.1f} gün hacim 2 katından fazla patladı.")
     return insights
 
-# ============================================================================
-# BÖLÜM 5: CANLI TARAMA (DNA EŞLEŞTİRME)
-# ============================================================================
 def scan_live_for_dna(ticker, dna, lookback=60):
     import yfinance as yf
     try:
@@ -303,7 +305,7 @@ def scan_live_for_dna(ticker, dna, lookback=60):
                 
             close = float(row['Close'])
             price_increase = ((current_price / close) - 1) * 100
-            if price_increase >= 10.0: # %10'dan fazla yükseldiyse fırsat kaçmış demektir
+            if price_increase >= 10.0:
                 continue
                 
             rsi = float(row.get('RSI_14', 50))
@@ -312,23 +314,20 @@ def scan_live_for_dna(ticker, dna, lookback=60):
             vol_ratio = float(row.get('Vol_Ratio', 1.0))
             bbp = float(row.get('BBP_20', 0.5))
             
-            # MA Tangle
             ema_vals = [float(row.get(f'EMA_{p}', np.nan)) for p in [8, 13, 21, 50, 200, 600] if pd.notna(row.get(f'EMA_{p}', np.nan))]
             ema_tangle = (np.std(ema_vals) / np.mean(ema_vals)) * 100 if len(ema_vals) > 1 and np.mean(ema_vals) > 0 else 50
             
-            # Fiyat Pozisyonu
             low_20 = df['Low'].iloc[max(0, i-19):i+1].min()
             high_20 = df['High'].iloc[max(0, i-19):i+1].max()
             range_20 = high_20 - low_20
             price_pos = ((close - low_20) / range_20) * 100 if range_20 > 0 else 50
             
-            # DNA Eşleşme Skoru (0-100)
             score = 0
             if dna['dip_rsi_25'] <= rsi <= dna['dip_rsi_75']: score += 25
             elif abs(rsi - dna['dip_rsi_med']) < 10: score += 15
             
             if abs(ema_tangle - dna['dip_ema_tangle_med']) < 5: score += 20
-            elif ema_tangle < 10: score += 10 # Sıkışma her zaman iyidir
+            elif ema_tangle < 10: score += 10
             
             if abs(vol_ratio - dna['dip_vol_ratio_med']) < 1.0: score += 20
             if price_pos < 30: score += 20
@@ -352,9 +351,6 @@ def scan_live_for_dna(ticker, dna, lookback=60):
     except Exception:
         return []
 
-# ============================================================================
-# BÖLÜM 6: STREAMLIT ARAYÜZÜ
-# ============================================================================
 with st.sidebar:
     st.header("⚙️ Kontrol Paneli")
     mode = st.radio("Analiz Modu", ["Tek Hisse Derin Analiz", "Çoklu Hisse Tarama", "Tüm BIST DNA Sentezi"], index=0)
@@ -369,7 +365,6 @@ with st.sidebar:
     st.markdown("---")
     st.info("🧬 **Sistem Özellikleri:**\n- 20 SMA + 20 EMA (SMA 800, EMA 600 dahil)\n- 80-80 Pivot Tespiti\n- 100 Bar Öncesi Yol Analizi\n- Python 3.14 Uyumlu")
 
-# MOD 1: TEK HİSSE DERİN ANALİZ
 if mode == "Tek Hisse Derin Analiz":
     st.header(f"🔬 {ticker_input} Derin Dip Analizi")
     if st.button("Analizi Başlat", type="primary"):
@@ -404,7 +399,6 @@ if mode == "Tek Hisse Derin Analiz":
                     sig_df = pd.DataFrame(live_signals)
                     sig_df = sig_df.sort_values('match_score', ascending=False)
                     
-                    # Durum etiketi ekle
                     def get_status(row):
                         if row['increase_pct'] < -5: return "⚠️ Zararda"
                         elif row['increase_pct'] < 3: return "🟡 Bekleme"
@@ -412,4 +406,24 @@ if mode == "Tek Hisse Derin Analiz":
                         else: return "🔴 Fırsat Kaçmış"
                     sig_df['Durum'] = sig_df.apply(get_status, axis=1)
                     
-                    st.dataframe(sig_df[['date', 'price', 'current_price', 'increase_pct', 'match_score', 'rsi', '
+                    cols_to_show = ['date', 'price', 'current_price', 'increase_pct', 'match_score', 'rsi', 'mfi', 'ema_tangle', 'Durum']
+                    st.dataframe(sig_df[cols_to_show], use_container_width=True)
+                else:
+                    st.warning("⚠️ Son 60 günde bu DNA profiline uyan (%60+ eşleşme) bir sinyal bulunamadı.")
+            
+            with tab2:
+                st.subheader("Dibe Giden 100 Barlık Yolun İstatistikleri")
+                st.markdown("Bir dibin gerçek olup olmadığını anlamak için oraya *nasıl* geldiğine bakmak gerekir.")
+                path_df = pd.DataFrame({
+                    'Metrik': [
+                        'Dip Öncesi Ortalama RSI',
+                        'Dip Öncesi Ulaşılan En Düşük RSI',
+                        'Dip Öncesi RSI < 30 Olduğu Gün Sayısı',
+                        'Dip Öncesi Ortalama Hacim Çarpanı',
+                        'Dip Öncesi Hacim Patlaması (>2x) Gün Sayısı',
+                        'Dip Öncesi Tam Bearish MA Hizalanması Olan Gün Sayısı'
+                    ],
+                    'Medyan / Ortalama Değer': [
+                        f"{dna['path_rsi_mean']:.1f}",
+                        f"{dna['path_rsi_min']:.1f}",
+                        f"{dna['path_rsi_below_30_avg']:.1f}
