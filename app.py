@@ -13,19 +13,8 @@ st.set_page_config(page_title="Ultra Pro Dip DNA Analiz", page_icon="🧬", layo
 st.title("🧬 Ultra Pro Dip DNA Analiz Sistemi")
 st.markdown("80-80 Pivot + 40+ MA + 100 Bar Öncesi Yol Analizi + İstatistiksel Sentez")
 
-@st.cache_data(ttl=86400)
 def get_bist_tickers():
-    try:
-        from borsapy import Borsapy
-        bp = Borsapy()
-        stocks = bp.get_all_stocks()
-        if stocks and len(stocks) > 50:
-            tickers = [s['kod'] + '.IS' for s in stocks if 'kod' in s]
-            st.sidebar.success(f"✅ Borsapy'den {len(tickers)} hisse çekildi.")
-            return tickers
-    except Exception as e:
-        st.sidebar.warning(f"⚠️ Borsapy bağlantı hatası, yedek liste kullanılıyor. ({e})")
-    
+    """Hisseleri Borsapy olmadan manuel olarak yazdık"""
     return [
         "THYAO.IS", "ASELS.IS", "GARAN.IS", "EREGL.IS", "SISE.IS", "AKBNK.IS", "HALKB.IS", 
         "ISCTR.IS", "YKBNK.IS", "SAHOL.IS", "TUPRS.IS", "KCHOL.IS", "SOKM.IS", "BIMAS.IS", 
@@ -275,8 +264,8 @@ def generate_dna_insights(dna):
     insights.append(f"📉 **Tipik Dip RSI:** {dna['dip_rsi_med']:.1f} (Çoğunlukla {dna['dip_rsi_25']:.1f} - {dna['dip_rsi_75']:.1f} aralığında)")
     insights.append(f"🌀 **MA Sıkışması:** Dip anında ortalama EMA tangle %{dna['dip_ema_tangle_med']:.2f}")
     insights.append(f"🚦 **Trend Durumu:** Diplerin %{dna['dip_bearish_align_pct']:.1f}'inde EMA'lar tam bearish hizalıydı (8<13<21<50<200<600)")
-    insights.append(f"🛣️ **Dibe Giden Yol:** Son 100 barda ortalama {dna['path_rsi_below_30_avg']:.1f} gun RSI < 30 bolgesinde kaldi.")
-    insights.append(f"💥 **Kapitulasyon:** Dibe inerken ortalama {dna['path_vol_spike_avg']:.1f} gun hacim 2 katindan fazla patladi.")
+    insights.append(f"🛣️ **Dibe Giden Yol:** Son 100 barda ortalama {dna['path_rsi_below_30_avg']:.1f} gün RSI < 30 bölgesinde kaldı.")
+    insights.append(f"💥 **Kapitülasyon:** Dibe inerken ortalama {dna['path_vol_spike_avg']:.1f} gün hacim 2 katından fazla patladı.")
     return insights
 
 def scan_live_for_dna(ticker, dna, lookback=60):
@@ -416,14 +405,103 @@ if mode == "Tek Hisse Derin Analiz":
                 st.markdown("Bir dibin gerçek olup olmadığını anlamak için oraya *nasıl* geldiğine bakmak gerekir.")
                 path_df = pd.DataFrame({
                     'Metrik': [
-                        'Dip Oncesi Ortalama RSI',
-                        'Dip Oncesi Ulasilan En Dusuk RSI',
-                        'Dip Oncesi RSI < 30 Oldugu Gun Sayisi',
-                        'Dip Oncesi Ortalama Hacim Carpani',
-                        'Dip Oncesi Hacim Patlamasi (>2x) Gun Sayisi',
-                        'Dip Oncesi Tam Bearish MA Hizalanmasi Olan Gun Sayisi'
+                        'Dip Öncesi Ortalama RSI',
+                        'Dip Öncesi Ulaşılan En Düşük RSI',
+                        'Dip Öncesi RSI < 30 Olduğu Gün Sayısı',
+                        'Dip Öncesi Ortalama Hacim Çarpanı',
+                        'Dip Öncesi Hacim Patlaması (>2x) Gün Sayısı',
+                        'Dip Öncesi Tam Bearish MA Hizalanması Olan Gün Sayısı'
                     ],
-                    'Medyan / Ortalama Deger': [
+                    'Medyan / Ortalama Değer': [
                         f"{dna['path_rsi_mean']:.1f}",
                         f"{dna['path_rsi_min']:.1f}",
-                        f"{dna['path_rsi_below_30_avg']:.1f}
+                        f"{dna['path_rsi_below_30_avg']:.1f} gün",
+                        f"{dna['path_vol_ratio_med']:.2f}x",
+                        f"{dna['path_vol_spike_avg']:.1f} gün",
+                        f"{dna['path_bearish_days_avg']:.1f} gün"
+                    ]
+                })
+                st.dataframe(path_df, use_container_width=True)
+                
+                st.info("💡 **Yorum:** Eğer 'Dip Öncesi Hacim Patlaması' yüksekse, bu dip genellikle bir 'kapitülasyon' dibidir ve sonrası güçlü gelir. 'Bearish Hizalanma' yüksekse, trendin olgunlaşmış bir düzeltme olduğu anlaşılır.")
+            
+            with tab3:
+                st.subheader(f"{ticker_input} Fiyat, 40+ MA ve 80-80 Pivot Dipleri")
+                fig = go.Figure()
+                fig.add_trace(go.Candlestick(x=df.index, open=df['Open'], high=df['High'], low=df['Low'], close=df['Close'], name='Fiyat'))
+                
+                pivot_dates = [d['date'] for d in dips_df.to_dict('records')]
+                pivot_prices = [d['price'] for d in dips_df.to_dict('records')]
+                fig.add_trace(go.Scatter(x=pivot_dates, y=pivot_prices, mode='markers', marker=dict(symbol='triangle-down', size=12, color='red'), name='80-80 Pivot Dipleri'))
+                
+                for p in [50, 200, 600, 800]:
+                    col_ema = f'EMA_{p}' if p in [50, 200, 600] else None
+                    col_sma = f'SMA_{p}' if p == 800 else None
+                    
+                    if col_ema and col_ema in df.columns:
+                        fig.add_trace(go.Scatter(x=df.index, y=df[col_ema], mode='lines', name=f'EMA {p}', line=dict(width=1)))
+                    if col_sma and col_sma in df.columns:
+                        fig.add_trace(go.Scatter(x=df.index, y=df[col_sma], mode='lines', name=f'SMA {p}', line=dict(width=1, dash='dash')))
+                
+                fig.update_layout(title=f"{ticker_input} Detaylı Grafik", height=600, xaxis_rangeslider_visible=False)
+                st.plotly_chart(fig, use_container_width=True)
+                
+                st.markdown("### Tüm Bulunan Diplerin Ham Verisi")
+                ham_cols = ['date', 'price', 'rsi', 'mfi', 'ema_tangle', 'vol_ratio', 'is_bearish_align', 'path_rsi_min', 'path_vol_spike_days']
+                st.dataframe(dips_df[ham_cols].sort_values('date', ascending=False), use_container_width=True)
+        else:
+            st.warning(f"⚠️ {ticker_input} için yeterli veri (en az 800 bar) veya 80-80 pivot dibi bulunamadı.")
+
+elif mode in ["Çoklu Hisse Tarama", "Tüm BIST DNA Sentezi"]:
+    st.header("🌐 Geniş Kapsamlı Tarama")
+    if mode == "Çoklu Hisse Tarama":
+        tickers_list = [t.strip().upper() for t in tickers_text.split('\n') if t.strip()]
+        tickers_list = [t if t.endswith('.IS') else t + '.IS' for t in tickers_list]
+    else:
+        tickers_list = get_bist_tickers()
+        st.warning(f"⚠️ {len(tickers_list)} hisse taranacak. Bu işlem 5-10 dakika sürebilir.")
+        
+    if st.button("Taramayı Başlat", type="primary"):
+        progress_bar = st.progress(0)
+        all_dips = []
+        
+        for i, t in enumerate(tickers_list):
+            try:
+                df, dips_df = process_stock(t, period="5y")
+                if dips_df is not None and not dips_df.empty:
+                    all_dips.append(dips_df)
+            except Exception:
+                pass
+            
+            if i % 10 == 0:
+                progress_bar.progress((i + 1) / len(tickers_list))
+        
+        progress_bar.progress(1.0)
+        
+        if all_dips:
+            master_df = pd.concat(all_dips, ignore_index=True)
+            st.success(f"✅ Tarama tamamlandı! Toplam {len(master_df)} dip analiz edildi.")
+            
+            master_dna = synthesize_dip_dna(master_df)
+            st.subheader("🧬 Tüm BIST İçin Ortak Dip DNA Sentezi")
+            insights = generate_dna_insights(master_dna)
+            for insight in insights:
+                st.markdown(f"- {insight}")
+            
+            st.subheader("🏆 En Çok Dip Oluşturan Hisseler")
+            summary = master_df.groupby('ticker').agg(
+                Dip_Sayısı=('ticker', 'count'),
+                Ort_Dip_RSI=('rsi', 'mean'),
+                Ort_EMA_Tangle=('ema_tangle', 'mean'),
+                Ort_Yol_Hacim_Patlaması=('path_vol_spike_days', 'mean')
+            ).sort_values('Dip_Sayısı', ascending=False).reset_index()
+            
+            st.dataframe(summary.head(50), use_container_width=True)
+            
+            csv = master_df.to_csv(index=False, encoding='utf-8-sig').encode('utf-8')
+            st.download_button("📥 Tüm Analiz Verisini İndir (CSV)", data=csv, file_name=f"bist_dip_dna_analiz_{datetime.now().strftime('%Y%m%d')}.csv", mime="text/csv")
+        else:
+            st.warning("⚠️ Hiçbir hisse için dip bulunamadı.")
+
+st.markdown("---")
+st.markdown("<div style='text-align: center; color: gray;'><p>Ultra Pro Dip DNA Analiz Sistemi v4.0 | 40+ MA, 100-Bar Yol Analizi, Borsapy Entegrasyonu</p></div>", unsafe_allow_html=True)
