@@ -275,8 +275,8 @@ def generate_dna_insights(dna):
     insights.append(f"📉 **Tipik Dip RSI:** {dna['dip_rsi_med']:.1f} (Çoğunlukla {dna['dip_rsi_25']:.1f} - {dna['dip_rsi_75']:.1f} aralığında)")
     insights.append(f"🌀 **MA Sıkışması:** Dip anında ortalama EMA tangle %{dna['dip_ema_tangle_med']:.2f}")
     insights.append(f"🚦 **Trend Durumu:** Diplerin %{dna['dip_bearish_align_pct']:.1f}'inde EMA'lar tam bearish hizalıydı (8<13<21<50<200<600)")
-    insights.append(f"🛣️ **Dibe Giden Yol:** Son 100 barda ortalama {dna['path_rsi_below_30_avg']:.1f} gün RSI < 30 bölgesinde kaldı.")
-    insights.append(f"💥 **Kapitülasyon:** Dibe inerken ortalama {dna['path_vol_spike_avg']:.1f} gün hacim 2 katından fazla patladı.")
+    insights.append(f"🛣️ **Dibe Giden Yol:** Son 100 barda ortalama {dna['path_rsi_below_30_avg']:.1f} gun RSI < 30 bolgesinde kaldi.")
+    insights.append(f"💥 **Kapitulasyon:** Dibe inerken ortalama {dna['path_vol_spike_avg']:.1f} gun hacim 2 katindan fazla patladi.")
     return insights
 
 def scan_live_for_dna(ticker, dna, lookback=60):
@@ -416,14 +416,14 @@ if mode == "Tek Hisse Derin Analiz":
                 st.markdown("Bir dibin gerçek olup olmadığını anlamak için oraya *nasıl* geldiğine bakmak gerekir.")
                 path_df = pd.DataFrame({
                     'Metrik': [
-                        'Dip Öncesi Ortalama RSI',
-                        'Dip Öncesi Ulaşılan En Düşük RSI',
-                        'Dip Öncesi RSI < 30 Olduğu Gün Sayısı',
-                        'Dip Öncesi Ortalama Hacim Çarpanı',
-                        'Dip Öncesi Hacim Patlaması (>2x) Gün Sayısı',
-                        'Dip Öncesi Tam Bearish MA Hizalanması Olan Gün Sayısı'
+                        'Dip Oncesi Ortalama RSI',
+                        'Dip Oncesi Ulasilan En Dusuk RSI',
+                        'Dip Oncesi RSI < 30 Oldugu Gun Sayisi',
+                        'Dip Oncesi Ortalama Hacim Carpani',
+                        'Dip Oncesi Hacim Patlamasi (>2x) Gun Sayisi',
+                        'Dip Oncesi Tam Bearish MA Hizalanmasi Olan Gun Sayisi'
                     ],
-                    'Medyan / Ortalama Değer': [
+                    'Medyan / Ortalama Deger': [
                         f"{dna['path_rsi_mean']:.1f}",
                         f"{dna['path_rsi_min']:.1f}",
                         f"{dna['path_rsi_below_30_avg']:.1f}
