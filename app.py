@@ -357,21 +357,22 @@ def synthesize_peak_dna(peaks_df):
     }
     return dna
 
+# HATA DÜZELTİLDİ: Anahtarlar açıkça tanımlandı
 def generate_dna_insights(dna, is_peak=False):
     if not dna:
         return []
     insights = []
-    prefix = "Tepe" if is_peak else "Dip"
-    insights.append(f"  Toplam Analiz Edilen {prefix}: {dna[f'total_{prefix.lower()}s']} ")
     
     if is_peak:
+        insights.append(f"  Toplam Analiz Edilen Tepe: {dna['total_peaks']} ")
         insights.append(f"📈 Tipik Tepe RSI: {dna['peak_rsi_med']:.1f} ({dna['peak_rsi_25']:.1f} - {dna['peak_rsi_75']:.1f}) ")
         insights.append(f"🌀 MA Sıkışması: %{dna['peak_ema_tangle_med']:.2f} ")
         insights.append(f"🚦 Bullish Hizalanma: %{dna['peak_bullish_align_pct']:.1f} ")
         insights.append(f"🛣️ RSI >70 Gün: {dna['path_rsi_above_70_avg']:.1f} gün ")
     else:
-        insights.append(f"📉 Tipik Dip RSI: {dna['dip_rsi_med']:.1f} ({dna['dip_rsi_25']:.1f} - {dna['dip_rsi_75']:.1f}) ")
-        insights.append(f"🌀 MA Sıkışması: %{dna['dip_ema_tangle_med']:.2f} ")
+        insights.append(f"  Toplam Analiz Edilen Dip: {dna['total_dips']} ")
+        insights.append(f" Tipik Dip RSI: {dna['dip_rsi_med']:.1f} ({dna['dip_rsi_25']:.1f} - {dna['dip_rsi_75']:.1f}) ")
+        insights.append(f" MA Sıkışması: %{dna['dip_ema_tangle_med']:.2f} ")
         insights.append(f"🚦 Bearish Hizalanma: %{dna['dip_bearish_align_pct']:.1f} ")
         insights.append(f"️ RSI <30 Gün: {dna['path_rsi_below_30_avg']:.1f} gün ")
         
@@ -532,7 +533,7 @@ if mode == "Tek Hisse Derin Analiz":
                             f"{dna_dip['path_bearish_days_avg']:.1f} gün"
                         ]
                     })
-                    st.dataframe(path_df, use_container_width=True)
+                    st.dataframe(path_df, width='stretch')
                 with tab3:
                     st.subheader(f"{ticker_input} Fiyat ve Pivot Dipler")
                     fig = go.Figure()
@@ -548,7 +549,7 @@ if mode == "Tek Hisse Derin Analiz":
                         if col_sma and col_sma in df.columns:
                             fig.add_trace(go.Scatter(x=df.index, y=df[col_sma], mode='lines', name=f'SMA {p}', line=dict(width=1, dash='dash')))
                     fig.update_layout(title=f"{ticker_input} Detaylı Grafik", height=600, xaxis_rangeslider_visible=False)
-                    st.plotly_chart(fig, use_container_width=True)
+                    st.plotly_chart(fig, width='stretch')
             else:
                 st.warning(f"⚠️ {ticker_input} için yeterli veri veya pivot dibi bulunamadı.")
                 
@@ -582,7 +583,7 @@ if mode == "Tek Hisse Derin Analiz":
                             f"{dna_peak['path_bullish_days_avg']:.1f} gün"
                         ]
                     })
-                    st.dataframe(path_df, use_container_width=True)
+                    st.dataframe(path_df, width='stretch')
             elif analyze_peaks:
                 st.warning(f"️ {ticker_input} için pivot tepesi bulunamadı.")
 
@@ -626,25 +627,25 @@ elif mode == "Çoklu Hisse Tarama":
                 Ort_EMA_Tangle=('ema_tangle', 'mean'),
                 Ort_Yol_Hacim_Patlamasi=('path_vol_spike_days', 'mean')
             ).sort_values('Dip_Sayisi', ascending=False).reset_index()
-            st.dataframe(summary.head(50), use_container_width=True)
+            st.dataframe(summary.head(50), width='stretch')
             
         if analyze_peaks and all_peaks:
             master_df_peak = pd.concat(all_peaks, ignore_index=True)
             st.success(f"✅ Tepe tarama tamamlandı! Toplam {len(master_df_peak)} tepe analiz edildi.")
             master_dna_peak = synthesize_peak_dna(master_df_peak)
-            st.subheader(" Seçili Hisseler İçin Ortak Tepe DNA Sentezi")
+            st.subheader("🧬 Seçili Hisseler İçin Ortak Tepe DNA Sentezi")
             insights = generate_dna_insights(master_dna_peak, is_peak=True)
             for insight in insights:
                 st.markdown(f"- {insight}")
                 
-            st.subheader("🏆 En Çok Tepe Oluşturan Hisseler")
+            st.subheader(" En Çok Tepe Oluşturan Hisseler")
             summary = master_df_peak.groupby('ticker').agg(
                 Tepe_Sayisi=('ticker', 'count'),
                 Ort_Tepe_RSI=('rsi', 'mean'),
                 Ort_EMA_Tangle=('ema_tangle', 'mean'),
                 Ort_Yol_Hacim_Patlamasi=('path_vol_spike_days', 'mean')
             ).sort_values('Tepe_Sayisi', ascending=False).reset_index()
-            st.dataframe(summary.head(50), use_container_width=True)
+            st.dataframe(summary.head(50), width='stretch')
             
         if not all_dips and (not analyze_peaks or not all_peaks):
             st.warning("️ Hiçbir hisse için dip/tepe bulunamadı.")
@@ -693,7 +694,7 @@ elif mode == "Tüm BIST DNA Sentezi":
                 Ort_EMA_Tangle=('ema_tangle', 'mean'),
                 Ort_Yol_Hacim_Patlamasi=('path_vol_spike_days', 'mean')
             ).sort_values('Dip_Sayisi', ascending=False).reset_index()
-            st.dataframe(summary.head(50), use_container_width=True)
+            st.dataframe(summary.head(50), width='stretch')
             
             csv_dip = master_df_dip.to_csv(index=False, encoding='utf-8-sig').encode('utf-8')
             st.download_button(" Dip Analiz Verisini İndir (CSV)", data=csv_dip, file_name=f"bist_dip_dna_analiz_{datetime.now().strftime('%Y%m%d')}.csv", mime="text/csv")
@@ -706,14 +707,14 @@ elif mode == "Tüm BIST DNA Sentezi":
             for insight in insights:
                 st.markdown(f"- {insight}")
                 
-            st.subheader("🏆 En Çok Tepe Oluşturan Hisseler")
+            st.subheader(" En Çok Tepe Oluşturan Hisseler")
             summary = master_df_peak.groupby('ticker').agg(
                 Tepe_Sayisi=('ticker', 'count'),
                 Ort_Tepe_RSI=('rsi', 'mean'),
                 Ort_EMA_Tangle=('ema_tangle', 'mean'),
                 Ort_Yol_Hacim_Patlamasi=('path_vol_spike_days', 'mean')
             ).sort_values('Tepe_Sayisi', ascending=False).reset_index()
-            st.dataframe(summary.head(50), use_container_width=True)
+            st.dataframe(summary.head(50), width='stretch')
             
             csv_peak = master_df_peak.to_csv(index=False, encoding='utf-8-sig').encode('utf-8')
             st.download_button(" Tepe Analiz Verisini İndir (CSV)", data=csv_peak, file_name=f"bist_peak_dna_analiz_{datetime.now().strftime('%Y%m%d')}.csv", mime="text/csv")
@@ -722,11 +723,11 @@ elif mode == "Tüm BIST DNA Sentezi":
             st.warning("⚠️ Hiçbir hisse için dip/tepe bulunamadı.")
 
 # MOD 4: CANLI SİNYALLER (SON 10 BAR)
-elif mode == " CANLI SİNYALLER (Son 10 Bar)":
+elif mode == "🎯 CANLI SİNYALLER (Son 10 Bar)":
     st.header("🎯 CANLI SİNYALLER - Son 10 Barda Sinyal Veren Hisseler")
     st.markdown("Bu modül, son 10 işlem günü içinde dip/tepe DNA'sına uyan hisseleri tespit eder.")
     
-    if st.button("🔍 Canlı Sinyalleri Tara", type="primary", use_container_width=True):
+    if st.button(" Canlı Sinyalleri Tara", type="primary", width='stretch'):
         all_tickers = get_bist_tickers()
         st.write(f" {len(all_tickers)} hisse taranıyor...")
         progress_bar = st.progress(0)
